@@ -12,7 +12,7 @@ mlflow_ui.log
 mlruns/
 mlflow.db
 
-datasets/
+
 data/
 
 .ipynb_checkpoints/
