@@ -1,35 +1,35 @@
-# Active Learning Experimental research
+# Active Learning Experiments
 
+Dit project bevat een experimentele omgeving voor het evalueren van verschillende Active Learning (AL) strategieën. De codebase is modulair opgezet om eenvoudig experimenten te draaien met meerdere strategieën, modellen en datasets.
 
+## Structuur
 
-## Research Question
+De experimentele setup is opgebouwd rond een aantal kerncomponenten:
 
-***Which Active Learning methods result in the greatest reduction in required labels without significant performance degradation?***
+### 1. **Strategieën**
+Gedefinieerd in de `strategies/` map. Iedere strategie is een klasse die een `run()` methode implementeert en instaat is om:
+- Te trainen op een gelabelde subset
+- Onzekerheden of informatiewaarden te berekenen op een ongelabelde subset
+- Nieuwe datapunten te selecteren voor labeling
 
----
+### 2. **Modellen**
+Machine Learning modellen worden gedefinieerd in `models/`. Momenteel wordt voornamelijk gewerkt met een `ResNet18` model.
 
-## Hypotheses
+### 3. **Datasets**
+Datasets worden opgehaald via `datasets/`, waarbij gebruik wordt gemaakt van PyTorch Datasets.
 
-### Null Hypotheses
+### 4. **Experiment Runner**
+Het bestand `run_experiment.py` voert meerdere experimenten parallel uit. Hierin is ondersteuning voor:
+- Herhaalde runs per strategie
+- Parallelle uitvoering (multiprocessing met `spawn`)
+- Dynamische labeling tot de ongelabelde pool uitgeput raakt
+- MLflow integratie voor logging van metrics en parameters
 
-- **H0.1**: There is no significant difference in accuracy between models trained with BADGE and Random Sampling, given the same number of labeled datapoints.
-- **H0.2**: The time efficiency of BADGE is not significantly lower than that of Random Sampling.
+### 5. **Logging & Evaluatie**
+Experimentele gegevens worden opgeslagen in MLflow:
+- Metrics per iteratie (zoals accuracy, training loss, tijd)
+- Totaalverbruikte tijd per run
+- Visualisaties en artefacten zoals nauwkeurigheidscurves
 
----
+Analyse gebeurt via een Jupyter-notebook (`active_learning_report.ipynb`), waarin automatisch de MLflow SQLite database wordt uitgelezen.
 
-## Experiment Setup
-
-### Experiment v1.0 --> BADGE vs. Random Sampling 
-| Parameter       | Value(s)                                 |
-|----------------|-------------------------------------------|
-| Dataset         | CIFAR-10                                 |
-| Models          | ResNet18                                 |
-| Strategies      | BADGE, Random Sampling                   |
-| Initial Sizes   | 5000                                     |
-| Query Sizes     | 500                                      |
-| Iterations      | 150                                      |
-| Evaluation Tool | MLflow                                   |
-| Logging         | Accuracy, Time per Iteration, Total Time |
-| Environment     | CUDA-enabled VM, Python 3.10, PyTorch 2  |
-
----
