@@ -1,0 +1,7 @@
+experiments:
+- model: resnet
+  strategy: random
+  initial_size: 100
+  query_size: 10
+  dataset: cifar10
+  debug: true

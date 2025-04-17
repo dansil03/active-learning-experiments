@@ -154,7 +154,7 @@ class BADGE:
             selected_indices.append(torch.argmin(dists).item())
         return selected_indices
 
-    def run(self, num_iterations=15, query_size=100, embed_limit=10000, unlabeled_subset_size=30000, reset_model_each_round=True, epochs_per_round=5):
+    def run(self, num_iterations=15, query_size=100, embed_limit=10000, unlabeled_subset_size=30000, reset_model_each_round=True, epochs_per_round=10):
         self.iteration_times = []
         start_total = time.time()
         for round in range(num_iterations):

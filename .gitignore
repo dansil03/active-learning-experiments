@@ -21,3 +21,6 @@ data/
 .idea/
 
 .env
+
+run_experiment_debug.py
+test.py

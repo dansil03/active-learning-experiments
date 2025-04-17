@@ -1,14 +1,14 @@
-experiments: 
-  - model: resnet 
-    strategy: badge 
-    initial_size: 5000 
-    query_size: [500] 
-    dataset: cifar10
+experiments:
+  - model: resnet
+    strategy: badge
+    initial_size: 500
+    query_size: [100]
+    dataset: cifar10 
 
   - model: resnet 
     strategy: random 
-    initial_size: 5000 
-    query_size: [500]
+    initial_size: 500
+    query_size: [100]
     dataset: cifar10
-
-
+  
+  
