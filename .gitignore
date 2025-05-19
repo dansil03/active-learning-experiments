@@ -12,9 +12,11 @@ mlflow_ui.log
 mlruns/
 mlflow.db
 
+.pytest_cache
 
 data/
-datasets/
+datasets/cifar10
+
 
 .ipynb_checkpoints/
 
