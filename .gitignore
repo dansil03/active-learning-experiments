@@ -15,7 +15,7 @@ mlflow.db
 .pytest_cache
 
 data/
-datasets/cifar10
+datasets/cifar10/
 
 
 .ipynb_checkpoints/
