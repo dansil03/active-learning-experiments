@@ -75,6 +75,27 @@ def run_strategy(cfg, run_idx):
             learner.unlabeled_indices = sorted(list(set(all_indices) - set(learner.labeled_indices)))
 
             i = 0
+
+            # vanaf hier
+            '''
+            iter_start = time.time()
+
+            learner.run(
+                num_iterations=1,
+                query_size=query_size,
+                epochs_per_round=5,
+                reset_model_each_round=True
+            )
+
+            acc = learner.accuracies[-1]
+            n_labels = learner.label_counts[-1]
+            log_metrics({"accuracy": acc, "label_count": n_labels}, step=i)
+
+            log_duration(iter_start, label=f"iteration_time_{i}")
+
+            '''
+
+            
             while len(learner.unlabeled_indices) >= query_size:
                 iter_start = time.time()
 
@@ -91,7 +112,7 @@ def run_strategy(cfg, run_idx):
 
                 log_duration(iter_start, label=f"iteration_time_{i}")
                 i += 1
-
+                
             mlflow.log_metric("total_time", learner.total_time)
 
             # Plot
@@ -107,7 +128,7 @@ def run_strategy(cfg, run_idx):
 
 if __name__ == "__main__":
     config = load_config()
-    REPEATS = 3
+    REPEATS = 2
     processes = []
 
     for cfg in config["experiments"]:

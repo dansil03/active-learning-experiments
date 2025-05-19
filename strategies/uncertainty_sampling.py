@@ -1,10 +1,10 @@
 import torch
-import time
 import torch.nn.functional as F
 from torch.utils.data import DataLoader, Subset
 import random
+import time
 
-class RandomSampler:
+class UncertaintySampler:
     def __init__(self, model_class, trainset, testloader, device, criterion, optimizer_fn, batch_size):
         self.model_class = model_class
         self.optimizer_fn = optimizer_fn
@@ -55,6 +55,26 @@ class RandomSampler:
                 total += y.size(0)
         return 100 * correct / total
 
+    def query(self, query_size):
+        self.model.eval()
+        subset = Subset(self.trainset, self.unlabeled_indices)
+        loader = DataLoader(subset, batch_size=self.batch_size, shuffle=False)
+
+        all_margins = []
+        with torch.no_grad():
+            for inputs, _ in loader:
+                inputs = inputs.to(self.device)
+                outputs = self.model(inputs)
+                probs = F.softmax(outputs, dim=1)
+                top2 = torch.topk(probs, 2, dim=1).values
+                margin = top2[:, 0] - top2[:, 1]
+                all_margins.append(margin.cpu())
+
+        margins = torch.cat(all_margins)  
+        indices = torch.argsort(margins)[:query_size]  
+        selected = [self.unlabeled_indices[i.item()] for i in indices]
+        return selected
+
     def run(self, num_iterations=5, query_size=10, epochs_per_round=1, reset_model_each_round=True):
         if not self.labeled_indices or not self.unlabeled_indices:
             self.initialize_dataset()
@@ -73,45 +93,9 @@ class RandomSampler:
             acc = self.evaluate()
             self.accuracies.append(acc)
 
-            # Random selectie
-            newly_selected = random.sample(self.unlabeled_indices, query_size)
-            original_unlabeled = list(self.unlabeled_indices)  # bewaar originele lijst
+            newly_selected = self.query(query_size)
             self.labeled_indices.extend(newly_selected)
             self.unlabeled_indices = [i for i in self.unlabeled_indices if i not in newly_selected]
-
-            if i == 0:  # Alleen na de eerste iteratie opslaan
-                self.model.eval()
-                all_unlabeled = Subset(self.trainset, self.unlabeled_indices)
-                dataloader = DataLoader(all_unlabeled, batch_size=self.batch_size, shuffle=False)
-
-                embs, probs = [], []
-                with torch.no_grad():
-                    for x, _ in dataloader:
-                        x = x.to(self.device)
-                        logits = self.model(x)
-                        prob = F.softmax(logits, dim=1).cpu()
-                        feat = self.model.avgpool(
-                            self.model.layer4(
-                                self.model.layer3(
-                                    self.model.layer2(
-                                        self.model.layer1(
-                                            self.model.relu(
-                                                self.model.bn1(
-                                                    self.model.conv1(x)
-                                                )))))))
-                        feat = feat.view(feat.size(0), -1).cpu()
-                        embs.append(feat)
-                        probs.append(prob)
-
-                embs = torch.cat(embs)
-                probs = torch.cat(probs)
-                pseudo_labels = torch.argmax(probs, dim=1)
-
-                torch.save({
-                    "embeddings": embs.cpu(),
-                    "pseudo_labels": pseudo_labels,
-                    "selected_indices": [original_unlabeled.index(x) for x in newly_selected [:4]]
-                }, "random_sampling_plot.pt")
 
             self.label_counts.append(len(self.labeled_indices))
 

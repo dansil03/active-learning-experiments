@@ -1,14 +1,7 @@
 experiments:
   - model: resnet
-    strategy: badge
+    strategy: uncertainty
     initial_size: 500
-    query_size: [100]
-    dataset: cifar10 
-
-  - model: resnet 
-    strategy: random 
-    initial_size: 500
-    query_size: [100]
+    query_size: [150]
     dataset: cifar10
-  
   
